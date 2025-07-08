@@ -9,7 +9,12 @@ const app = express()
 
 app.use(express.json())
 if (process.env.NODE_ENV !== 'test') {
-    app.use(morgan('tiny'))
+}
+else {
+  app.use(morgan('tiny'))
+  const testingRoute = require('./controllers/testing')
+  app.use('/api/testing', testingRoute)
+
 }
 
 app.use('/api/blogs', blogs)
@@ -17,7 +22,7 @@ app.use('/api/users', users)
 app.use('/login', login)
 
 const errorHandler = (error, request, response, next) => {
-  logger.error(error.message)
+  logger.error(error)
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })

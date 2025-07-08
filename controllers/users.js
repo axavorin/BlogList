@@ -23,7 +23,7 @@ userRoute.post('/', async (request, response) => {
 
   const token = jwt.sign(userForToken, process.env.SECRET)
 
-  response.status(200).json({ token, username: user.username, name: username.name })
+  response.status(200).json({ token, username: user.username, name: user.name })
 })
 
 module.exports = userRoute

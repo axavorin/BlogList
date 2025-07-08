@@ -18,12 +18,23 @@ blogRoute.get('/', async (request, response) => {
   response.json(blogs)
 })
 
+blogRoute.get('/:id', async (request, response) => {
+  const blogs = await Blog.findById(request.params.id)
+                          .populate('creator')
+
+  response.json(blogs)
+})
+
 blogRoute.post('/', async (request, response) => {
+  console.log(getTokenFrom(request))
   const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'token invalid' })
   }
   const user = await User.findById(decodedToken.id)
+  if (!user) {
+    return response.status(401).json({ error: 'token invalid' })
+  }
   
   const blog = new Blog({...request.body, creator: user._id})
   user.blogs = user.blogs.concat(blog._id)
@@ -56,17 +67,9 @@ blogRoute.delete('/:id', async (request, response) => {
 })
 
 blogRoute.put('/:id', async (request,  response) => {
-  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token invalid' })
-  }
-
   const { title, author, url, likes } = request.body
 
   const blog = await Blog.findById(request.params.id)
-  if (blog.creator != decodedToken.id) {
-    return response.status(401).json({ error: 'token invalid' })
-  }
 
   blog.title = title
   blog.author = author
